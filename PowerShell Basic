@@ -1,0 +1,24 @@
+# Get-ADUser example (select the users who are in IT department and located in Shanghai)
+Get-ADUser -Properties * -Filter 'Department -eq "IT" -and City -eq "Shanghai"' | Format-Table Name,SamAccountName,Department,City,Manager
+
+# New-ADUser example (add multiple AD users from a .csv file) 
+$Users = Import-Csv -Path "C:\Users\Administrator\Desktop\Users.csv"
+foreach ($User in $Users)
+{
+$UserFirsname = $User.Firstname
+$UserLastname = $User.Lastname
+$Displayname = $User.Firstname + " " + $User.Lastname
+$SAM = $User.Firstname + "." + $User.Lastname
+$UPN = $User.Firstname + "." + $User.Lastname + "@" + "vccware.com"
+$Password = $User.Password
+$OU = "OU=User Accounts,DC=vccware,DC=com"
+$City = $User.City
+$Country = $User.Country
+$Title = $User.Title
+$Department = $User.Department
+$Manager = (Get-ADUser $User.Manager).DistinguishedName
+New-ADUser -GivenName "$UserFirsname" -Surname "$UserLastname" -Name "$Displayname" -DisplayName "$Displayname" -SamAccountName "$SAM" -UserPrincipalName "$UPN" -AccountPassword (convertTo-SecureString $Password -AsPlainText -Force) -Path "$OU" -ChangePasswordAtLogon $false -Enabled $true -PasswordNeverExpires $true -Country "$Country" -City "$City" -Title "$Title" -Department "$Department" -Manager "$Manager"
+}
+
+# A .csv file example
+Firstname	Lastname	Password	City	Country	Title	Department	Manager
